@@ -1,0 +1,32 @@
+Insertado:
+name: Diego
+dpi: 777777
+date_birth: 01/01/1900
+address: guatemala
+Insertado:
+name: Popines
+dpi: 222222
+date_birth: 01/01/1900
+address: guatemala
+Insertado:
+name: Cuevas
+dpi: 333333
+date_birth: 01/01/1900
+address: guatemala
+Insertado:
+name: Daniel
+dpi: 444444
+date_birth: 01/01/1900
+address: guatemala
+Insertado:
+name: Cosillo
+dpi: 555555
+date_birth: 01/01/1900
+address: guatemala
+Insertado:
+name: Saul
+dpi: 666666
+date_birth: 01/01/1900
+address: guatemala
+Datos actualizados para DPI 777777
+Cliente con DPI 444444 eliminado exitosamente.

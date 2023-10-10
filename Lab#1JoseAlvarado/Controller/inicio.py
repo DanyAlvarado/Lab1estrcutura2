@@ -12,9 +12,9 @@ def main():
     sys.stdout = open("temp_output.txt", "w")
     
     # Llamar al método para procesar el archivo JSON y agregar datos al árbol
-    lector.procesar_json_y_agregar_al_arbol("C:/Users/Usuario/Desktop/jsonfake.txt", arbol)
+    lector.procesar_json_y_agregar_al_arbol("C:/Users/Usuario/Desktop/inputs.txt", arbol)
     
-    # Restaurar la salida estándar original
+    ##Restaurar la salida estándar original
     sys.stdout = sys.__stdout__
     
     # Crear una instancia de menu_principal y pasar el árbol como argumento

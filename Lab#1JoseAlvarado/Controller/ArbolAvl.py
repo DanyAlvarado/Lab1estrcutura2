@@ -1,23 +1,29 @@
 import json
 import os
-import hashlib
 from io import StringIO
+from os.path import isfile, join
+import math
+
 
 
 
 
 
 class cliente:
-    def __init__(self, Nombre, Dpi, fecha_nacimiento, Direccion, companies, encode, decode, nuevo_dpi, solo_empresas):
+    def __init__(self, Nombre, Dpi, fecha_nacimiento, Direccion, companies, mensaje, rcifrado, dcifrado):
+
         self.Nombre = Nombre
         self.Dpi = Dpi
         self.fecha_nacimiento = fecha_nacimiento
         self.direccion = Direccion
         self.companies = companies if companies is not None else []
-        self.encode = encode
-        self.decode = decode
-        self.nuevo_dpi = nuevo_dpi
-        self.solo_empresas = solo_empresas if solo_empresas is not None else []
+        self.mensaje = mensaje if mensaje is not None else []
+        self.rcifrado = rcifrado
+        self.dcifrado = dcifrado
+        # self.encode = encode
+        # self.decode = decode
+        # self.nuevo_dpi = nuevo_dpi
+        # self.solo_empresas = solo_empresas if solo_empresas is not None else []
         
         
         
@@ -221,12 +227,14 @@ class ArbolAvl:
 
 
 
+
+
    
 class lz78:
     
     @staticmethod
     def comprimir(no_comprimido):
-        """Comprime una cadena en una lista de símbolos de salida."""
+        """"""
 
         # Construir el diccionario.
         tamaño_diccionario = 1000
@@ -273,16 +281,152 @@ class lz78:
             w = entrada
         return resultado.getvalue()
 
+class cifrado:
+
+    # Encry
+
+    @staticmethod
+    def encryptMessage(msg): 
+        key = "HACKER"
+        cipher = "" 
+    
+        # track key indices 
+        k_indx = 0
+    
+        msg_len = float(len(msg)) 
+        msg_lst = list(msg) 
+        key_lst = sorted(list(key)) 
+    
+        # calculate column of the matrix 
+        col = len(key) 
+        
+        # calculate maximum row of the matrix 
+        row = int(math.ceil(msg_len / col)) 
+    
+        # add the padding character '_' in empty 
+        # the empty cell of the matix  
+        fill_null = int((row * col) - msg_len) 
+        msg_lst.extend('_' * fill_null) 
+    
+        # create Matrix and insert message and  
+        # padding characters row-wise  
+        matrix = [msg_lst[i: i + col]  
+                for i in range(0, len(msg_lst), col)] 
+    
+        # read matrix column-wise using key 
+        for _ in range(col): 
+            curr_idx = key.index(key_lst[k_indx]) 
+            cipher += ''.join([row[curr_idx]  
+                            for row in matrix]) 
+            k_indx += 1
+    
+        return cipher 
+    
+    # Decryption 
+    @staticmethod
+    def decryptMessage(cipher): 
+        key = "HACKER"
+        msg = "" 
+    
+        # track key indices 
+        k_indx = 0
+    
+        # track msg indices 
+        msg_indx = 0
+        msg_len = float(len(cipher)) 
+        msg_lst = list(cipher) 
+    
+        # calculate column of the matrix 
+        col = len(key) 
+        
+        # calculate maximum row of the matrix 
+        row = int(math.ceil(msg_len / col)) 
+    
+        # convert key into list and sort  
+        # alphabetically so we can access  
+        # each character by its alphabetical position. 
+        key_lst = sorted(list(key)) 
+    
+        # create an empty matrix to  
+        # store deciphered message 
+        dec_cipher = [] 
+        for _ in range(row): 
+            dec_cipher += [[None] * col] 
+    
+        # Arrange the matrix column wise according  
+        # to permutation order by adding into new matrix 
+        for _ in range(col): 
+            curr_idx = key.index(key_lst[k_indx]) 
+    
+            for j in range(row): 
+                dec_cipher[j][curr_idx] = msg_lst[msg_indx] 
+                msg_indx += 1
+            k_indx += 1
+    
+        # convert decrypted msg matrix into a string 
+        try: 
+            msg = ''.join(sum(dec_cipher, [])) 
+        except TypeError: 
+            raise TypeError("This program cannot", 
+                            "handle repeating words.") 
+    
+        null_count = msg.count('_') 
+    
+        if null_count > 0: 
+            return msg[: -null_count] 
+    
+        return msg
+
+
+
+
 
             
 
 
 
 
-
 class leerjason:
+    def procesar_archivos_txt(self, ruta, dpi, arbol):
+        contenido = os.listdir(ruta)
+
+        for nombre in contenido:
+            if isfile(join(ruta, nombre)) and nombre.endswith(".txt"):
+                with open(join(ruta, nombre), 'r') as archivo:
+                    mensaje = archivo.read()
+
+                # Dividir el nombre del archivo en partes usando "-" como separador
+                partes = nombre.split("-")
+
+                # Verificar si el nombre del archivo tiene el formato adecuado
+                if len(partes) == 3 and partes[0] == "CONV":
+                    dpi = partes[1]  # El DPI se encuentra en la segunda parte
+
+                    # Buscar el cliente en el árbol AVL
+                    cliente_encontrado = arbol.buscar(dpi)
+
+                    if cliente_encontrado:
+                        # Agregar el mensaje a la lista de mensajes del cliente
+                        if not hasattr(cliente_encontrado.cliente, 'mensajes'):
+                            cliente_encontrado.cliente.mensajes = []
+                        cliente_encontrado.cliente.mensajes.append(mensaje)
+
+                        recomendacion = mensaje
+                        cifrar = cifrado()
+
+                        rcifrado = cifrar.encryptMessage(recomendacion)
+                        cliente_encontrado.cliente.rcifrado = rcifrado
+
+                        mdecodificado = rcifrado
+
+                        dcifrado = cifrar.decryptMessage(mdecodificado)
+
+                        cliente_encontrado.cliente.dcifrado = dcifrado
+                    else:
+                        print(f"No se encontró ningún cliente con DPI {dpi} para el mensaje.")
     def procesar_json_y_agregar_al_arbol(self, file_path, arbol):
-        with open(file_path, "r") as f:
+
+         with open(file_path, "r") as f:
             for line in f:
                 if line.startswith("INSERT;"):
                     json_data = line[len("INSERT;"):]
@@ -294,49 +438,24 @@ class leerjason:
                         Dpi = data["dpi"]
                         Fecha_nacimiento = data.get("datebirth", None)
                         Direccion = data["address"]
-                        companies = data.get("companies", [])  # Obtener la lista de companies o una lista vacía si no existe
-
-                         # Concatenar DPI con cada dato de la lista companies
-                        companies_with_dpi = [f"{Dpi}-{company}" for company in companies]
-                        
-                        mensaje_completo = ", ".join(companies_with_dpi)
-
-                        metodolz = lz78()
-
-                        encode = metodolz.comprimir(mensaje_completo)
-                        
-
-                        mensaje = encode
-
-                        decode = metodolz.descomprimir(mensaje)
-
-                        nuevo_dpi = None
-                        solo_empresas = []
-
-                        elementos = decode.split(',')
-
-                
-
-                        # Iterar sobre los elementos para separar el DPI y las empresas
-                        for elemento in elementos:
-                            partes = elemento.split('-')  # Dividir el elemento en DPI y nombre de la empresa
-                            if len(partes) == 2:
-                                dpi, empresa = partes  # Asignar DPI y nombre de la empresa
-                                solo_empresas.append(empresa)  # Agregar la empresa a la lista 'solo_empresas'
-                                if nuevo_dpi is None:
-                                    nuevo_dpi = dpi  # Establecer el DPI si aún no está asignado
-
-
-                        nuevo_cliente = cliente(Nombre, Dpi, Fecha_nacimiento, Direccion, companies_with_dpi, encode, decode, nuevo_dpi, solo_empresas)
-                        arbol.agregar(nuevo_cliente)  # Agregar el cliente al árbol AVL
-
-                       
+                        companies = data.get("companies", [])
 
                         
+                        # Llamar a la función para procesar archivos TXT y asignar mensajes
+                        ruta_txt = r"C:\Users\Usuario\Desktop\inputs"  # Reemplaza con la ruta correcta
+                        self.procesar_archivos_txt(ruta_txt, Dpi, arbol)
 
+                        # Crear un nuevo cliente con los datos del JSON
+                        nuevo_cliente = cliente(Nombre, Dpi, Fecha_nacimiento, Direccion, companies, mensaje=None, rcifrado= None, dcifrado = None)
+                        
+                        # Agregar el cliente al árbol AVL
+                        arbol.agregar(nuevo_cliente)
+                        
+                        
 
                     except json.JSONDecodeError:
-                        print("Error al decodificar JSON en la línea:", line)  
+                        print("Error al decodificar JSON en la línea:", line)
+
 
             if line.startswith("DELETE;"):
                     json_data = line[len("DELETE;"):]
@@ -380,6 +499,8 @@ class leerjason:
                     except json.JSONDecodeError as e:
                         print(f"Error al decodificar JSON en la línea: {line}")
                         print(f"Detalles del error: {e}")
+
+
                         
 
 
@@ -398,18 +519,17 @@ def limpiar_consola():
 class menu_principal:
     def __init__(self, arbol):
         self.arbol = arbol
-        self.clientes_eliminados = []
-        self.clientes_actualizados = []
             
     def mostrar_menu(self):
         while True:
             print("---------------------------")
-            print("1. Ver bitácora de clientes encriptados")
+            print("1. Mostar clientes")
             print("---------------------------")
             print("2. Buscar cliente por DPI")
             print("---------------------------")
             print("3. Salir")
             op = input("Ingrese la opción a la que desea ingresar: ")
+            
 
             if op == "1":
                 print("Estos son los clientes existentes:")
@@ -417,14 +537,15 @@ class menu_principal:
                 op1 = input("Ingrese 'Si' si desea volver a realizar esta acción: ")
                 if op1 != "Si":
                     limpiar_consola()
-                    
+
             elif op == "2":
+                # Buscar cliente por DPI
                 self.buscar_cliente_por_dpi()
                 limpiar_consola()
-            
             elif op == "3":
                 # Salir del programa
                 break
+    
                 
         
         
@@ -436,10 +557,19 @@ class menu_principal:
         if nodo is not None:
             self.__mostrar_clientes_recursivo(nodo.izquierda)
             cliente = nodo.cliente
-            print("Nombre:", cliente.Nombre)  
+            print("Nombre:", cliente.Nombre)
+            print("---------------------------")
+            print("Número de Dpi: ", cliente.Dpi)
+            print("---------------------------")
             print("Fecha de nacimiento:", cliente.fecha_nacimiento)
+            print("---------------------------")
             print("Dirección:", cliente.direccion)
-            print("Codificacion:", cliente.encode)
+            print("---------------------------")
+            print("Empresas del cliente:", cliente.companies)
+            print("---------------------------")
+            # Verificar si el cliente tiene un mensaje y mostrarlo si está presente
+            if hasattr(cliente, 'mensaje'):
+                print("Mensaje del archivo:", cliente.rcifrado)
             print("---------------------------")
             self.__mostrar_clientes_recursivo(nodo.derecha)
 
@@ -458,12 +588,19 @@ class menu_principal:
 
                 if cliente_encontrado:
                     print("Cliente encontrado:")
+                    print("---------------------------")
                     print("Nombre:", cliente_encontrado.cliente.Nombre)
-                    print("Nùmero de Dpi: ", cliente_encontrado.cliente.nuevo_dpi)
+                    print("---------------------------")
+                    print("Nùmero de Dpi: ", cliente_encontrado.cliente.Dpi)
+                    print("---------------------------")
                     print("Fecha de nacimiento:", cliente_encontrado.cliente.fecha_nacimiento)
+                    print("---------------------------")
                     print("Dirección:", cliente_encontrado.cliente.direccion)
-                    print('Informacion desencriptada: ', cliente_encontrado.cliente.decode)
-                    print("Empresas del cliente: ", cliente_encontrado.cliente.solo_empresas)
+                    print("---------------------------")
+                    print("Empresas del cliente: ", cliente_encontrado.cliente.companies)
+                    print("---------------------------")
+                    print("Mensaje decifrado: ", cliente_encontrado.cliente.dcifrado)
+                    print("---------------------------")
                 else:
                     print(f"No se encontró ningún cliente con DPI {dpi}.")
             except ValueError:
